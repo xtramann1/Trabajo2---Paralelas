@@ -9,13 +9,15 @@
 
 using namespace std;
 
-string Matriz[384629][5];
-string MatrizOrdenada[52440][5];
+string Matriz[384629][6];
+string MatrizDias[198][4];
+string Formulas[3][3];
 
+//Transforma la fecha a cantidad de dias
 void Dias(int fila){
     string fecha = "";
     int tamano = Matriz[fila][0].length();
-    float anio, mes, dia, hora, minuto, SumaTotal;
+    int anio, mes, dia, SumaTotal, SumaTotal2, aux;
     for(int i=0; i < tamano-1 ;i++){
         if(Matriz[fila][0][i] != '-' && Matriz[fila][0][i] != ' ' && Matriz[fila][0][i] != ':'){
             fecha = fecha + Matriz[fila][0][i];
@@ -35,34 +37,38 @@ void Dias(int fila){
                         istringstream(fecha) >> (dia);
                         fecha = "";
                     }
-                    else{
-                        if(Matriz[fila][0][i] == ':' && i == 13){
-                            istringstream(fecha) >> (hora);
-                            fecha = "";
-                        }
-                        else{
-                            if(Matriz[fila][0][i] == ':' && i == 16){
-                                istringstream(fecha) >> (minuto);
-                                fecha = "";
-                                i = tamano;
-                            }
-                        }
-                    }
                 }
             }
         }
     }
-    anio = anio*365;
-    SumaTotal =(mes-1)*30 + dia + (hora/24) + (minuto/1440);
-    Matriz[fila][0] = to_string(SumaTotal+anio);
+    SumaTotal = anio*365 + (mes-1)*30 + dia;
+    if(fila == 0){
+        Matriz[fila][5] = to_string(SumaTotal);
+    }
+    else{
+        if(fila == 384628){
+            Matriz[0][5] = "1";
+        }
+        else{
+            istringstream(Matriz[0][5]) >> SumaTotal2;
+            aux = SumaTotal - SumaTotal2;
+            if(aux == 0){
+                Matriz[fila][5] = "1";
+            }
+            else{
+                Matriz[fila][5] = to_string(aux+1);
+            }
+        }
+    }
 }
 
+// Agrega a matriz los datos del archivo datos.csv
 void agregarAmatriz(){
     ifstream infile("datos.csv");
     string line ="";
     string dato = "";
     int i = 0;
-    long long conversion = 0;
+    double conversion = 0;
     getline(infile,line);
     while(i<384629){
         for(int j=0;j<5;j++){
@@ -94,110 +100,107 @@ void agregarAmatriz(){
 }
 void imprimir(){
     for(int i = 0; i < 20; i++){
-        for(int j = 0; j < 5; j++){
-            cout<<" "<<MatrizOrdenada[i][j];
+        for(int j = 0; j < 6; j++){
+            cout<<"  ;  "<<Matriz[i][j];
         }
         cout<<endl;
     }
 }
-void Quicksort(int columna, int izq, int der){
-    int i = izq;
-    int j = der;
-    long long cambio1;
-    long long cambio2;
-    long long cambio3;
-    string tmp[1][5];
-    string p = Matriz[(izq+der)/2][columna];
-    istringstream(p) >> cambio2;
-    while(i<=j){
-        istringstream(Matriz[i][columna]) >> cambio1;
-        while(cambio1 < cambio2){
-            i++;
-            istringstream(Matriz[i][columna]) >> cambio1;
+void imprimir2(){
+    for(int i = 0; i < 20; i++){
+        for(int j = 0; j < 4; j++){
+            cout<<"  ;  "<<MatrizDias[i][j];
         }
-        istringstream(Matriz[j][columna]) >> cambio3;
-        while(cambio3 > cambio2){
-            j--;
-            istringstream(Matriz[j][columna]) >> cambio3;
-        }
-        if(i<=j){
-            tmp[0][0] = Matriz[i][0];
-            tmp[0][1] = Matriz[i][1];
-            tmp[0][2] = Matriz[i][2];
-            tmp[0][3] = Matriz[i][3];
-            tmp[0][4] = Matriz[i][4];
-            Matriz[i][0] = Matriz[j][0];
-            Matriz[i][1] = Matriz[j][1];
-            Matriz[i][2] = Matriz[j][2];
-            Matriz[i][3] = Matriz[j][3];
-            Matriz[i][4] = Matriz[j][4];
-            Matriz[j][0] = tmp[0][0];
-            Matriz[j][1] = tmp[0][1];
-            Matriz[j][2] = tmp[0][2];
-            Matriz[j][3] = tmp[0][3];
-            Matriz[j][4] = tmp[0][4];
-            i++;j--;
-        }
-
-    }
-    if (izq < j)
-    {
-        Quicksort(columna, izq, j);
-    }
-    if (i < der)
-    {
-        Quicksort(columna, i, der);
+        cout<<endl;
     }
 }
 
-void CantidadDias(int min, int max, int contador, int cantidad){
-    int fecha1, fecha2, dias;
-    istringstream(Matriz[min][0]) >> fecha1;
-    istringstream(Matriz[max][0]) >> fecha2;
-    if ((fecha2 - fecha1) == 0){
-        dias = 1;
+//deja solo la fecha en formato YY-MM-DD
+string FechaSinHHMM(string dato){
+    int tamano = dato.length();
+    string fecha = "";
+    for(int i=0; i < tamano-1 ;i++){
+        if(dato[i] != ' '){
+            fecha = fecha + dato[i];
+        }
+        else{
+            return fecha;
+        }
     }
-    else{
-        dias = fecha2 - fecha1;
-    }
+    return fecha;
+}
+//pasa a MatrizDias la acumulacion de ventas en un solo dia mas el valor total ganado
+void JuntarDias(int contador, double cantidad, double valor, string dato, string fechaDias){
     if(contador == 0){
-        MatrizOrdenada[contador][0] = "dias ;";
-        MatrizOrdenada[contador][1] = " skrull ;";
-        MatrizOrdenada[contador][2] = " cantidad ;";
-        MatrizOrdenada[contador][3] = " Valor ;";
-        MatrizOrdenada[contador][4] = " nombre ;";
+        MatrizDias[contador][0] = "Fecha ;";
+        MatrizDias[contador][1] = " cantidad ;";
+        MatrizDias[contador][2] = " Valor total ;";
+        MatrizDias[contador][3] = " Fecha en dias ;";
+
     }
     else{
-        MatrizOrdenada[contador][0] = to_string(dias);
-        MatrizOrdenada[contador][1] = Matriz[min][1];
-        MatrizOrdenada[contador][2] = to_string(cantidad);
-        MatrizOrdenada[contador][3] = Matriz[min][3];
-        MatrizOrdenada[contador][4] = Matriz[min][4];
+        MatrizDias[contador][0] = FechaSinHHMM(dato);
+        MatrizDias[contador][1] = to_string(cantidad);
+        MatrizDias[contador][2] = to_string(valor);
+        MatrizDias[contador][3] = fechaDias;
     }
 }
 
-void Ordenar(){
-    int j=0, cantidad=0, cantidad1=0, contador = 1;
-    CantidadDias(0,0,0,cantidad);
+//Agregar a MatrizDias los dias acumulados
+void OrdenarDias(){
+    double cantidad=0, cantidad1=0, valor=0, valor1=0, contador = 1;
+    JuntarDias(0,0,0,"hola"," ");
     for(int i=0; i < 384629; i++){
         istringstream(Matriz[i][2]) >> cantidad1;
         cantidad = cantidad + cantidad1;
-        if(Matriz[i][1] != Matriz[i+1][1]){
-            Quicksort(0,j,i);
-            CantidadDias(j,i,contador,cantidad);
-            j = i + 1;
+        istringstream(Matriz[i][3]) >> valor1;
+        valor = valor + (valor1*cantidad1);
+        if(Matriz[i][5] != Matriz[i+1][5]){
+            JuntarDias(contador,cantidad,valor, Matriz[i][0], Matriz[i][5]);
             contador++;
             cantidad = 0;
+            valor = 0;
         }
     }
-    cout<< contador << endl;
 }
-//modificar para colocar en los archivos, de momento quedara como comentario
+// procedimiento para llevar a cabo la regresión lineal
+//////////////////////////////  Inicio Regresion lineal ///////////////////////////////////////////
+double beta(double x, double y){
+    double sx = 0, sy = 0;
+    double equis, ye;
+    for(int i=0; i < 198; i++){
+        istringstream(MatrizDias[i][3]) >> equis;
+        istringstream(MatrizDias[i][2]) >> ye;
+        sy = sy + ((equis - x)*(ye - y));
+        sx = sx + (equis - x) * (equis - x);
+    }
+    return sy/sx;
+}
 
-void Acsv(string ArchivoCSV, string matriz[][5]){
+double alfa(double beta, double x, double y){
+    return y - (beta * x);
+}
+
+void Regresion(){
+    double promediox = 0, promedioy = 0;
+    double equis, ye;
+    for(int i = 0; i < 198; i++){
+        istringstream(MatrizDias[i][3]) >> equis;
+        istringstream(MatrizDias[i][2]) >> ye;
+        promediox = promediox + equis/198;
+        promedioy = promedioy + ye/198;
+    }
+    double betacoef = beta(promediox, promedioy);
+    double alfacoef = alfa(betacoef, promediox, promedioy);
+    cout<<"La ecuacion  de regresion lineal >>  es Y = "<< betacoef << "x + "<< alfacoef<<endl;
+}
+///////////////////////////////////     Fin regresion lineal      ////////////////////////////////////
+//////////////////////////////////      Inicio Arima        /////////////////////////////////////////
+//Crear el archivo CSV
+void Acsv(string ArchivoCSV, string matriz[][4]){
     ofstream archivo;
     archivo.open("al/"+ArchivoCSV+".csv", ios::out | ios::app);
-    for(int i=0; i < 52440; i++){
-        archivo<<matriz[i][0]<<"; "<<matriz[i][1]<<"; "<<matriz[i][2]<<"; "<<matriz[i][3]<<"; "<<matriz[i][4]<<endl;
+    for(int i=0; i < 198; i++){
+        archivo<<matriz[i][0]<<"; "<<matriz[i][1]<<"; "<<matriz[i][2]<<"; "<<matriz[i][3]<<endl;
     }
 }

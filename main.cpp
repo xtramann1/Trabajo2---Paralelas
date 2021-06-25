@@ -7,9 +7,9 @@ using namespace std;
 
 int main(int argc, char** argv){
     agregarAmatriz();
-    Quicksort(1,0,384628);
-    Ordenar();
-    imprimir();
-    Acsv("Ordenado",MatrizOrdenada);
+    //Quicksort(1,0,384628);
+    OrdenarDias();
+    Regresion();
+    Acsv("Ordenado",MatrizDias);
     return EXIT_SUCCESS;
 }
