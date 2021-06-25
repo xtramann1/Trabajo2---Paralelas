@@ -165,12 +165,12 @@ void OrdenarDias(){
 }
 // procedimiento para llevar a cabo la regresión lineal
 //////////////////////////////  Inicio Regresion lineal ///////////////////////////////////////////
-double beta(double x, double y){
+double beta(double x, double y, int columna){
     double sx = 0, sy = 0;
     double equis, ye;
     for(int i=0; i < 198; i++){
         istringstream(MatrizDias[i][3]) >> equis;
-        istringstream(MatrizDias[i][2]) >> ye;
+        istringstream(MatrizDias[i][columna]) >> ye;
         sy = sy + ((equis - x)*(ye - y));
         sx = sx + (equis - x) * (equis - x);
     }
@@ -181,16 +181,16 @@ double alfa(double beta, double x, double y){
     return y - (beta * x);
 }
 
-void Regresion(){
+void Regresion(int columna){
     double promediox = 0, promedioy = 0;
     double equis, ye;
     for(int i = 0; i < 198; i++){
         istringstream(MatrizDias[i][3]) >> equis;
-        istringstream(MatrizDias[i][2]) >> ye;
+        istringstream(MatrizDias[i][columna]) >> ye;
         promediox = promediox + equis/198;
         promedioy = promedioy + ye/198;
     }
-    double betacoef = beta(promediox, promedioy);
+    double betacoef = beta(promediox, promedioy, columna);
     double alfacoef = alfa(betacoef, promediox, promedioy);
     cout<<"La ecuacion  de regresion lineal >>  es Y = "<< betacoef << "x + "<< alfacoef<<endl;
 }

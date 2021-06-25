@@ -9,7 +9,11 @@ int main(int argc, char** argv){
     agregarAmatriz();
     //Quicksort(1,0,384628);
     OrdenarDias();
-    Regresion();
+    cout<<"Regresion lineal para cantidades vendidas"<<endl;
+    Regresion(1);
+    cout<<endl;
+    cout<<"Regresion lineal para valor total"<<endl;
+    Regresion(2);
     Acsv("Ordenado",MatrizDias);
     return EXIT_SUCCESS;
 }
