@@ -6,6 +6,7 @@
 #include <string>
 #include <cstdlib>
 #include <string>
+#include <math.h>
 
 using namespace std;
 
@@ -98,23 +99,6 @@ void agregarAmatriz(){
         i++;
     }
 }
-void imprimir(){
-    for(int i = 0; i < 20; i++){
-        for(int j = 0; j < 6; j++){
-            cout<<"  ;  "<<Matriz[i][j];
-        }
-        cout<<endl;
-    }
-}
-void imprimir2(){
-    for(int i = 0; i < 20; i++){
-        for(int j = 0; j < 4; j++){
-            cout<<"  ;  "<<MatrizDias[i][j];
-        }
-        cout<<endl;
-    }
-}
-
 //deja solo la fecha en formato YY-MM-DD
 string FechaSinHHMM(string dato){
     int tamano = dato.length();
@@ -165,14 +149,31 @@ void OrdenarDias(){
 }
 // procedimiento para llevar a cabo la regresión lineal
 //////////////////////////////  Inicio Regresion lineal ///////////////////////////////////////////
+double Cuadrado(double valor){
+    return valor*valor;
+}
+double Relacion(double x, double y, int columna){
+    double arriba = 0, equis, ye, Rx = 0, Ry = 0, abajo;
+    for (int i=0; i < 198; i++){
+        istringstream(MatrizDias[i][3]) >> equis;
+        istringstream(MatrizDias[i][columna]) >> ye;
+        arriba += ((equis - x)*(ye - y));
+        Rx += Cuadrado(equis-x);
+        Ry += Cuadrado(ye-y);
+    }
+    Rx = sqrt(Rx);
+    Ry = sqrt(Ry);
+    abajo = Rx * Ry;
+    return arriba/abajo;
+}
 double beta(double x, double y, int columna){
     double sx = 0, sy = 0;
     double equis, ye;
     for(int i=0; i < 198; i++){
         istringstream(MatrizDias[i][3]) >> equis;
         istringstream(MatrizDias[i][columna]) >> ye;
-        sy = sy + ((equis - x)*(ye - y));
-        sx = sx + (equis - x) * (equis - x);
+        sy += ((equis - x)*(ye - y));
+        sx += ((equis - x) * (equis - x));
     }
     return sy/sx;
 }
@@ -187,15 +188,50 @@ void Regresion(int columna){
     for(int i = 0; i < 198; i++){
         istringstream(MatrizDias[i][3]) >> equis;
         istringstream(MatrizDias[i][columna]) >> ye;
-        promediox = promediox + equis/198;
-        promedioy = promedioy + ye/198;
+        promediox += equis/198;
+        promedioy += ye/198;
     }
-    double betacoef = beta(promediox, promedioy, columna);
+    double betacoef = (beta(promediox, promedioy, columna))*(Relacion(promediox, promedioy, columna));
     double alfacoef = alfa(betacoef, promediox, promedioy);
     cout<<"La ecuacion  de regresion lineal >>  es Y = "<< betacoef << "x + "<< alfacoef<<endl;
 }
 ///////////////////////////////////     Fin regresion lineal      ////////////////////////////////////
-//////////////////////////////////      Inicio Arima        /////////////////////////////////////////
+//////////////////////////////////      Inicio Correlacion lineal       /////////////////////////////////////////
+double ALFA2(int columna){
+    double Sxy=0, equis, ye, Sx=0, Sy=0, cuadrado=0, sumcuadrado=0;
+    double arriba, abajo;
+    for(int i=0; i < 198; i++){
+        istringstream(MatrizDias[i][3]) >> equis;
+        istringstream(MatrizDias[i][columna]) >> ye;
+        Sxy += (equis*ye);
+        Sx += equis;
+        Sy += ye;
+        cuadrado += Cuadrado(equis);
+    }
+    sumcuadrado = Cuadrado(Sx);
+    arriba = (198*Sxy - (Sx*Sy));
+    abajo = (198*cuadrado - sumcuadrado);
+    return arriba/abajo;
+}
+double BETA2(int columna){
+    double Sy = 0, Sx = 0, equis, ye;
+    double alfita = 0, betita;
+    alfita = ALFA2(columna);
+    for (int i = 0; i < 198; i++){
+        istringstream(MatrizDias[i][3]) >> equis;
+        istringstream(MatrizDias[i][columna]) >> ye;
+        Sy += ye;
+        Sx += equis;
+    }
+    betita = Sy - (alfita*Sx);
+    return betita/198;
+}
+void correlacion(int columna){
+    double alfita, betita;
+    alfita = ALFA2(columna);
+    betita = BETA2(columna);
+    cout<<"La ecuacion  de Correlacion lineal >>  es Y = "<< alfita << "x + "<< betita<<endl;
+}
 //Crear el archivo CSV
 void Acsv(string ArchivoCSV, string matriz[][4]){
     ofstream archivo;

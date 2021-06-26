@@ -12,7 +12,6 @@ main.o: main.cpp funciones.cpp
 crear:
 	mkdir -p al
 	touch al/Ordenado.csv
-	touch al/Formulas.csv
 
 .PHONY: clean 
 clean: 
