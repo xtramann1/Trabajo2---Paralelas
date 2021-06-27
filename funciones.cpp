@@ -10,9 +10,14 @@
 
 using namespace std;
 
+//Variales globales a utilizar
+
 string Matriz[384629][6];
 string MatrizDias[198][4];
 string Formulas[3][3];
+
+/*En esta primera parte se realiza un 
+traspaso de los datos a una matriz para poder trabajar con ellos*/
 
 //Transforma la fecha a cantidad de dias
 void Dias(int fila){
@@ -99,7 +104,7 @@ void agregarAmatriz(){
         i++;
     }
 }
-//deja solo la fecha en formato YY-MM-DD
+//Deja solo la fecha en formato YY-MM-DD (Año-Mes-Día)
 string FechaSinHHMM(string dato){
     int tamano = dato.length();
     string fecha = "";
@@ -113,7 +118,7 @@ string FechaSinHHMM(string dato){
     }
     return fecha;
 }
-//pasa a MatrizDias la acumulacion de ventas en un solo dia mas el valor total ganado
+//Pasa a MatrizDias la acumulacion de ventas en un solo dia mas el valor total ganado
 void JuntarDias(int contador, double cantidad, double valor, string dato, string fechaDias){
     if(contador == 0){
         MatrizDias[contador][0] = "Fecha ;";
@@ -147,11 +152,18 @@ void OrdenarDias(){
         }
     }
 }
-// procedimiento para llevar a cabo la regresión lineal
+/* En esta segunda parte se realizarán las funciones necesarias para utilizar los modelos
+1. Regresión lineal      Y = a + (bR)x
+2* Correlación lineal    Y = a + bx */
+
 //////////////////////////////  Inicio Regresion lineal ///////////////////////////////////////////
+
+//Función para sacar el cuadrado de un número
 double Cuadrado(double valor){
     return valor*valor;
 }
+
+//Función para determinar el coeficiente de relación (R)
 double Relacion(double x, double y, int columna){
     double arriba = 0, equis, ye, Rx = 0, Ry = 0, abajo;
     for (int i=0; i < 198; i++){
@@ -166,6 +178,8 @@ double Relacion(double x, double y, int columna){
     abajo = Rx * Ry;
     return arriba/abajo;
 }
+
+//Función para determinar beta (b)
 double beta(double x, double y, int columna){
     double sx = 0, sy = 0;
     double equis, ye;
@@ -178,10 +192,12 @@ double beta(double x, double y, int columna){
     return sy/sx;
 }
 
+//Función para determinar el alfa (a)
 double alfa(double beta, double x, double y){
     return y - (beta * x);
 }
 
+//Función para determinar la ecuación de regresión lineal
 void Regresion(int columna){
     double promediox = 0, promedioy = 0;
     double equis, ye;
@@ -196,7 +212,10 @@ void Regresion(int columna){
     cout<<"La ecuacion  de regresion lineal >>  es Y = "<< betacoef << "x + "<< alfacoef<<endl;
 }
 ///////////////////////////////////     Fin regresion lineal      ////////////////////////////////////
+
 //////////////////////////////////      Inicio Correlacion lineal       /////////////////////////////////////////
+
+//Función para determinar el alfa (a)
 double ALFA2(int columna){
     double Sxy=0, equis, ye, Sx=0, Sy=0, cuadrado=0, sumcuadrado=0;
     double arriba, abajo;
@@ -213,6 +232,8 @@ double ALFA2(int columna){
     abajo = (198*cuadrado - sumcuadrado);
     return arriba/abajo;
 }
+
+//Función para determinar el beta (b)
 double BETA2(int columna){
     double Sy = 0, Sx = 0, equis, ye;
     double alfita = 0, betita;
@@ -226,12 +247,16 @@ double BETA2(int columna){
     betita = Sy - (alfita*Sx);
     return betita/198;
 }
+
+//Función para determinar la ecuación de la correlación lineal
 void correlacion(int columna){
     double alfita, betita;
     alfita = ALFA2(columna);
     betita = BETA2(columna);
     cout<<"La ecuacion  de Correlacion lineal >>  es Y = "<< alfita << "x + "<< betita<<endl;
 }
+//////////////////////////////////      Fin Correlacion lineal       /////////////////////////////////////////
+
 //Crear el archivo CSV
 void Acsv(string ArchivoCSV, string matriz[][4]){
     ofstream archivo;
